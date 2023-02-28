@@ -7,7 +7,10 @@ import threading
 from py2neo import Graph
 import pandas as pd 
 import numpy as np 
-from tqdm import tqdm 
+from tqdm import tqdm
+import hashlib
+
+import baidu
 
 def print_data_info(data_path):
     triples = []
@@ -24,11 +27,9 @@ def print_data_info(data_path):
 class MedicalExtractor(object):
     def __init__(self):
         super(MedicalExtractor, self).__init__()
-        self.graph = Graph(
-            host="127.0.0.1",
-            http_port=7474,
-            user="neo4j",
-            password="123456")
+        uri = "bolt://localhost:7687"
+        auth = ("neo4j","123456")
+        self.graph = Graph(uri,auth=auth)
 
         # 共8类节点
         self.drugs = [] # 药品
@@ -279,16 +280,12 @@ class MedicalExtractor(object):
         self.export_data(self.rels_acompany,'./graph_data/rels_acompany.json')
         self.export_data(self.rels_category,'./graph_data/rels_category.json')
 
-
-
-
-
 if __name__ == '__main__':
     path = "./graph_data/medical.json"
     # print_data_info(path)
     extractor = MedicalExtractor()
     extractor.extract_triples(path)
-    # extractor.create_entitys()
-    # extractor.create_relations()
-    # extractor.set_diseases_attributes()
-    extractor.export_entitys_relations()
+    extractor.create_entitys()
+    extractor.create_relations()
+    extractor.set_diseases_attributes()
+    # extractor.export_entitys_relations()
